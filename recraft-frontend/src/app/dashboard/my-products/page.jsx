@@ -1,30 +1,59 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useState } from 'react';
-import { mockProducts } from '@/lib/mockData';
-import styles from '../dashboardPages.module.css'; // Shared header styles
-import listStyles from './myProducts.module.css'; // New styles for our product list
+import { fetchMyProducts, deleteProduct } from '@/lib/api'; // These API functions need to be created
+import styles from '../dashboardPages.module.css';
+import listStyles from './myProducts.module.css';
 
 export default function MyProductsPage() {
-  // In a real app, you'd fetch only the products for the logged-in artisan.
-  // We'll filter the mock data for 'artisan1' as a simulation.
-  const [products, setProducts] = useState(mockProducts.filter(p => p.artisanId === 'artisan1'));
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const handleDelete = (productId) => {
-    // This is a simulated delete.
-    if (window.confirm("Are you sure you want to delete this product? This action cannot be undone.")) {
-      setProducts(prevProducts => prevProducts.filter(p => p._id !== productId));
-      console.log(`DELETING product with ID: ${productId}`);
-      alert("Product deleted successfully! (Simulation)");
+  useEffect(() => {
+    const loadMyProducts = async () => {
+      try {
+        // Fetch only the products belonging to the logged-in artisan
+        const myProducts = await fetchMyProducts();
+        setProducts(myProducts);
+      } catch (err) {
+        setError('Failed to load your products. Please try again later.');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadMyProducts();
+  }, []);
+
+  const handleDelete = async (productId) => {
+    if (window.confirm("Are you sure you want to permanently delete this product?")) {
+      try {
+        await deleteProduct(productId);
+        // Update the UI by removing the deleted product from the state
+        setProducts(currentProducts => currentProducts.filter(p => p._id !== productId));
+        alert("Product deleted successfully!");
+      } catch (err) {
+        alert(`Failed to delete product: ${err.message}`);
+      }
     }
   };
+
+  if (isLoading) {
+    return <p>Loading your products...</p>;
+  }
+
+  if (error) {
+    return <p style={{ color: 'red' }}>{error}</p>;
+  }
 
   return (
     <div>
       <header className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>My Products</h1>
-        <p className={styles.pageSubtitle}>Manage your product listings and inventory.</p>
+        <p className={styles.pageSubtitle}>Manage your product listings, inventory, and status.</p>
       </header>
 
       <div style={{ marginBottom: '2rem' }}>
@@ -55,7 +84,9 @@ export default function MyProductsPage() {
             </div>
           ))
         ) : (
-          <p>You haven't listed any products yet.</p>
+          <div style={{ textAlign: 'center', padding: '2rem', border: '1px dashed #ddd', borderRadius: '8px' }}>
+            <p>You haven't listed any products yet. Click the "Add New Product" button to get started!</p>
+          </div>
         )}
       </div>
     </div>

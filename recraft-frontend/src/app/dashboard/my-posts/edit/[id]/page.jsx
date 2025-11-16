@@ -1,98 +1,94 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter, notFound } from 'next/navigation';
-import { mockInspirationPosts } from '@/lib/mockData';
-// We reuse the same CSS from the "Add Product" form for a consistent look!
-import styles from '../../../my-products/add/addProduct.module.css'; 
+import { useParams, useRouter } from 'next/navigation';
+import { fetchPostById, updatePost } from '@/lib/api'; // Use the public fetchPostById
+import styles from '../../../my-products/add/addProduct.module.css';
 
 export default function EditInspirationPostPage() {
   const router = useRouter();
   const params = useParams();
   const { id } = params;
 
-  // State to hold the post data we are editing
   const [postData, setPostData] = useState(null);
-  const [fileName, setFileName] = useState('Upload a new image (optional)');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  // On component mount, find the post by its ID and populate the form state
   useEffect(() => {
-    const postToEdit = mockInspirationPosts.find(p => p._id === id);
-    if (postToEdit) {
-      // Convert materials array back to a comma-separated string for the input field
-      setPostData({
-        ...postToEdit,
-        materials: postToEdit.materialsUsed.join(', '),
-      });
-    } else {
-      // If no post is found for this ID, show a 404 page
-      notFound();
-    }
-  }, [id]); // Rerun this effect if the ID in the URL changes
+    if (!id) return;
+    const loadPostForEdit = async () => {
+      try {
+        const post = await fetchPostById(id);
+        setPostData({
+          ...post,
+          materialsUsed: post.materialsUsed.join(', '),
+          photos: post.photos[0] || '',
+        });
+      } catch (err) {
+        setError('Failed to load post data.');
+      }
+    };
+    loadPostForEdit();
+  }, [id]);
 
-  // If the data is still being "fetched" and set, show a loading message
-  if (!postData) {
-    return <p>Loading post data...</p>;
-  }
+  if (error) return <p style={{ color: 'red' }}>{error}</p>;
+  if (!postData) return <p>Loading post data...</p>;
   
-  // --- These handlers are identical to the "Add Post" page ---
-  const handleChange = (e) => {
-    setPostData({ ...postData, [e.target.name]: e.target.value });
-  };
-  
-  const handleImageChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setPostData(prev => ({ ...prev, image: e.target.files[0] }));
-      setFileName(e.target.files[0].name);
-    }
-  };
+  const handleChange = (e) => { setPostData({ ...postData, [e.target.name]: e.target.value }); };
 
-  // Find this function in the file and update it
-  const handleSubmit = (e) => {
+  // --- UPDATE (SAVE CHANGES) FUNCTIONALITY ---
+  const handleSaveChanges = async (e) => {
     e.preventDefault();
-    // In a real app, you'd send the updated data to your backend API
-    alert("Your post has been updated! (Simulation)");
-    router.push('/dashboard/my-posts');
+    setIsLoading(true);
+    setError('');
+    try {
+      const dataToSend = { 
+        ...postData, 
+        photos: [postData.photos],
+        materialsUsed: postData.materialsUsed.split(',').map(m => m.trim()) 
+      };
+      await updatePost(id, dataToSend);
+      alert("Changes saved successfully!");
+      router.push('/dashboard/my-posts');
+    } catch (err) {
+      setError(`Failed to save changes: ${err.message}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
   
+  // --- PUBLISH FUNCTIONALITY ---
+  const handlePublish = async (e) => {
+    e.preventDefault();
+    if (!window.confirm("Are you sure you want to publish this post? It will become visible to everyone.")) return;
+    
+    setIsLoading(true);
+    setError('');
+    try {
+      const dataToSend = { ...postData, status: 'Published', photos: [postData.photos], materialsUsed: postData.materialsUsed.split(',').map(m => m.trim()) };
+      await updatePost(id, dataToSend); // We use the same 'update' endpoint
+      alert("Post published successfully!");
+      router.push('/dashboard/my-posts');
+    } catch (err) {
+      setError(`Failed to publish post: ${err.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className={styles.formContainer}>
-      <header className={styles.formHeader}>
-        <h1 className={styles.formTitle}>Edit Inspiration Post</h1>
-        <p className={styles.formSubtitle}>Make changes to your post below.</p>
-      </header>
-      
-      {/* The form is identical to the "Add Post" page, */}
-      {/* but the `value` of each input is pre-filled from the `postData` state */}
-      <form onSubmit={handleSubmit}>
-        <div className={styles.formGroup}>
-          <label htmlFor="title" className={styles.label}>Post Title</label>
-          <input type="text" id="title" name="title" value={postData.title} onChange={handleChange} className={styles.input} required />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="description" className={styles.label}>Description / Tutorial Steps</label>
-          <textarea id="description" name="description" value={postData.description} onChange={handleChange} className={styles.textarea} required />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="materials" className={styles.label}>Materials Used</label>
-          <input type="text" id="materials" name="materials" value={postData.materials} onChange={handleChange} className={styles.input} />
-          <p className={styles.helperText}>Separate materials with a comma.</p>
-        </div>
-        
-        {/* Image Uploader */}
-        <section className={styles.formSection}>
-          <h2 className={styles.sectionTitle}>Change Image</h2>
-           <p className={styles.helperText} style={{marginBottom: '1rem'}}>Current image: {postData.photos[0]}</p>
-          <label htmlFor="image" className={styles.fileInputLabel}>
-            {fileName}
-          </label>
-          <input type="file" id="image" name="image" onChange={handleImageChange} className={styles.fileInput} accept="image/*" />
-        </section>
-
+      <header className={styles.formHeader}><h1 className={styles.formTitle}>Edit Inspiration Post</h1><p className={styles.formSubtitle}>Make changes to your post and publish when ready.</p></header>
+      <form>
+        <div className={styles.formGroup}><label htmlFor="title" className={styles.label}>Post Title</label><input type="text" id="title" name="title" value={postData.title} onChange={handleChange} className={styles.input} required /></div>
+        <div className={styles.formGroup}><label htmlFor="photos" className={styles.label}>Image URL</label><input type="text" id="photos" name="photos" value={postData.photos} onChange={handleChange} className={styles.input} required /></div>
+        <div className={styles.formGroup}><label htmlFor="description" className={styles.label}>Description</label><textarea id="description" name="description" value={postData.description} onChange={handleChange} className={styles.textarea} required /></div>
+        <div className={styles.formGroup}><label htmlFor="materialsUsed" className={styles.label}>Materials Used</label><input type="text" id="materialsUsed" name="materialsUsed" value={postData.materialsUsed} onChange={handleChange} className={styles.input} /><p className={styles.helperText}>Separate with commas.</p></div>
+        {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
         <div className={styles.formActions}>
-          <button type="submit" className={`${styles.button} ${styles.publishButton}`}>
-            Save Changes
-          </button>
+          <button onClick={handleSaveChanges} className={`${styles.button} ${styles.draftButton}`} disabled={isLoading}>{isLoading ? 'Saving...' : 'Save Changes'}</button>
+          {postData.status === 'Draft' && (<button onClick={handlePublish} className={`${styles.button} ${styles.publishButton}`} disabled={isLoading}>{isLoading ? 'Publishing...' : 'Publish Post'}</button>)}
         </div>
       </form>
     </div>

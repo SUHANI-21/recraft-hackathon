@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import styles from './checkout.module.css';
+import { createOrder } from '@/lib/api';
 
 export default function CheckoutPage() {
   const { cartItems, getCartTotal, clearCart } = useCart();
@@ -28,26 +29,41 @@ export default function CheckoutPage() {
     }
   };
 
-  const handlePlaceOrder = (event) => {
-    event.preventDefault(); // Prevent the form from actually submitting
+const handlePlaceOrder = async (event) => {
+    event.preventDefault();
     
-    // In a real app, you would send the order data to a backend here.
-    // For this simulation, we'll just show an alert, clear the cart,
-    // and redirect to the confirmation page.
-    
-    alert('Thank you for your order! (This is a simulation - no payment was taken).');
-    
-    clearCart(); // Clear items from the cart
-    router.push('/order-confirmation'); // Redirect to the confirmation page
+    // 1. Prepare the order data for the backend
+    const orderData = {
+      orderItems: cartItems.map(item => ({
+        _id: item._id,
+        name: item.name,
+        qty: item.quantity,
+        image: item.photos[0], // Assuming the first photo
+        price: item.price,
+        product: item._id,
+      })),
+      // In a real app, you would get this from the form state
+      shippingAddress: {
+        address: "123 Main St",
+        city: "Testville",
+        zipCode: "12345",
+      },
+      totalPrice: total,
+    };
+
+    try {
+      // 2. Call the backend API
+      await createOrder(orderData);
+      
+      // 3. On success, clear the cart and redirect
+      alert('Thank you for your order!');
+      clearCart();
+      router.push('/order-confirmation');
+    } catch (error) {
+      console.error("Failed to place order:", error);
+      alert(`Failed to place order: ${error.message}`);
+    }
   };
-  
-  // If cart is empty, redirect to home
-  if (cartItems.length === 0) {
-     if (typeof window !== 'undefined') {
-       router.push('/');
-     }
-     return null; // Return null to prevent rendering anything on the server
-  }
 
   return (
     <div>

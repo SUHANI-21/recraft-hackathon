@@ -9,9 +9,8 @@ import styles from '../auth.module.css';
 
 export default function SignupPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { signup } = useAuth(); // Correctly using the 'signup' function
   
-  // Add 'phone' and 'address' to our form state
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -20,20 +19,42 @@ export default function SignupPage() {
     phone: '',
     address: ''
   });
+  
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Signing up with data:", formData);
+    setIsLoading(true);
+    setError('');
     
-    // Pass the full form data to our context function
-    login(formData); 
-    
-    // Redirect to the dashboard profile page
-    router.push('/dashboard/profile');
+    try {
+      // Create a data object to send, excluding unnecessary fields for Buyers
+      const userData = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        userType: formData.userType,
+      };
+      
+      if (formData.userType === 'Artisan') {
+        userData.contact = {
+          phone: formData.phone,
+          address: formData.address,
+        };
+      }
+      
+      await signup(userData); // Call the correct async signup function
+      router.push('/dashboard/profile'); // Redirect on success
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -42,9 +63,10 @@ export default function SignupPage() {
       <div className={styles.authContainer}>
         <div className={styles.formCard}>
           <h1 className={styles.title}>Create Your Account</h1>
+          
+          {/* --- THE FORM ITSELF --- */}
           <form onSubmit={handleSubmit}>
             
-            {/* --- ROLE SELECTION --- */}
             <div className={styles.formGroup}>
               <label className={styles.label}>I want to...</label>
               <div className={styles.roleSelection}>
@@ -65,7 +87,6 @@ export default function SignupPage() {
               </div>
             </div>
 
-            {/* --- BASIC ACCOUNT DETAILS --- */}
             <h2 className={styles.sectionHeader}>Account Details</h2>
             <div className={styles.formGroup}>
               <label htmlFor="name" className={styles.label}>
@@ -82,7 +103,6 @@ export default function SignupPage() {
               <input type="password" id="password" name="password" className={styles.input} onChange={handleChange} required />
             </div>
 
-            {/* --- CONDITIONAL ARTISAN FIELDS --- */}
             {formData.userType === 'Artisan' && (
               <>
                 <h2 className={styles.sectionHeader}>Store Details (Required)</h2>
@@ -90,21 +110,27 @@ export default function SignupPage() {
                   <label htmlFor="phone" className={styles.label}>Contact Phone</label>
                   <input 
                     type="tel" id="phone" name="phone" className={styles.input} 
-                    onChange={handleChange} required={formData.userType === 'Artisan'} // Required only for artisans
+                    onChange={handleChange} required={formData.userType === 'Artisan'} 
                   />
                 </div>
                 <div className={styles.formGroup}>
                   <label htmlFor="address" className={styles.label}>Shop or Studio Address</label>
                   <input 
                     type="text" id="address" name="address" className={styles.input} 
-                    onChange={handleChange} required={formData.userType === 'Artisan'} // Required only for artisans
+                    onChange={handleChange} required={formData.userType === 'Artisan'} 
                   />
                 </div>
               </>
             )}
 
-            <button type="submit" className={styles.button} style={{marginTop: '1rem'}}>
-              Create Account
+            {error && (
+              <p style={{ color: '#c62828', textAlign: 'center', margin: '1rem 0' }}>
+                {error}
+              </p>
+            )}
+
+            <button type="submit" className={styles.button} disabled={isLoading} style={{marginTop: '1rem'}}>
+              {isLoading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
 

@@ -37,15 +37,31 @@
   object-fit: cover;
 }
 
-.authorInfo a { /* Style the link to the artisan page */
+/* DELETE these two styles: */
+/*
+.authorInfo a {
   text-decoration: none;
 }
-
 .userName {
   font-size: 1rem;
   font-weight: 600;
   color: #333;
   transition: color 0.3s ease;
+}
+*/
+
+/* REPLACE them with this single, improved style block */
+.userName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  transition: color 0.3s ease;
+  text-decoration: none; /* Add this for links */
+}
+
+.userName:hover {
+  color: var(--dark-green);
+  text-decoration: underline; /* Add underline on hover for links */
 }
 
 .userName:hover {

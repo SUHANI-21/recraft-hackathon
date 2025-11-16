@@ -2,57 +2,67 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { register as apiRegister, login as apiLogin } from '@/lib/api';
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // On initial load, check if a user is saved in localStorage
   useEffect(() => {
-    const storedUser = localStorage.getItem('recraft_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    try {
+      const storedUser = localStorage.getItem('recraft_user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    } catch (error) {
+      console.error("Failed to parse user from localStorage", error);
     }
+    setLoading(false);
   }, []);
 
-  // --- SIMULATED LOGIN ---
-  // ... inside AuthContext.js
-
-  // --- UPDATED SIMULATED LOGIN ---
-  // --- UPDATED SIMULATED LOGIN/SIGNUP ---
-  const login = (userData) => {
-    // Construct the user object based on the form data
-    const simulatedUser = { 
-      name: userData.name, 
-      email: userData.email, 
-      type: userData.userType || 'Buyer' // Default to 'Buyer'
-    };
-
-    // If the user is an Artisan, add their contact details
-    if (simulatedUser.type === 'Artisan') {
-      simulatedUser.contact = {
-        phone: userData.phone,
-        address: userData.address
-      };
+  const signup = async (userData) => {
+    try {
+      const data = await apiRegister(userData);
+      if (data && data.token) {
+        localStorage.setItem('recraft_user', JSON.stringify(data));
+        setUser(data);
+        return data;
+      }
+    } catch (error) {
+      console.error("Signup failed:", error.message);
+      // --- THIS IS THE FIX ---
+      // This makes sure the page component knows there was an error.
+      throw error; 
     }
-
-    localStorage.setItem('recraft_user', JSON.stringify(simulatedUser));
-    setUser(simulatedUser);
   };
 
-// ... rest of the file is the same
+  const login = async (email, password) => {
+    try {
+      const data = await apiLogin({ email, password });
+      if (data && data.token) {
+        localStorage.setItem('recraft_user', JSON.stringify(data));
+        setUser(data);
+        return data;
+      }
+    } catch (error) {
+      console.error("Login failed:", error.message);
+      // --- THIS IS THE FIX ---
+      // This makes sure the page component knows there was an error.
+      throw error; 
+    }
+  };
 
-  // --- SIMULATED LOGOUT ---
   const logout = () => {
     localStorage.removeItem('recraft_user');
     setUser(null);
-    router.push('/'); // Redirect to homepage on logout
+    router.push('/');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, signup, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,37 +1,31 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { fetchMyOrders } from '@/lib/api';
 import styles from '../dashboardPages.module.css';
 
-// Conversion rate for simulation
 const INR_CONVERSION_RATE = 83.5;
 
-// Enriched sample order data
-const sampleOrders = [
-  { 
-    id: 'REC1003', 
-    date: '2025-10-28', 
-    status: 'Delivered', 
-    items: [
-      { name: 'Upcycled Denim Tote Bag', artisan: 'EcoCrafts by Jane', priceUSD: 45.00 }
-    ]
-  },
-  { 
-    id: 'REC1002', 
-    date: '2025-09-15', 
-    status: 'Delivered', 
-    items: [
-      { name: 'Plastic Waste Wall Clock', artisan: 'Plasticity Designs', priceUSD: 75.00 }
-    ]
-  },
-  { 
-    id: 'REC1001', 
-    date: '2025-08-01', 
-    status: 'Delivered', 
-    items: [
-      { name: 'Newspaper Woven Basket', artisan: 'EcoCrafts by Jane', priceUSD: 35.00 }
-    ]
-  },
-];
-
 export default function OrderHistoryPage() {
+  const [orders, setOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadOrders = async () => {
+      try {
+        const myOrders = await fetchMyOrders();
+        setOrders(myOrders);
+      } catch (error) {
+        console.error("Failed to fetch orders:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadOrders();
+  }, []);
+
+  if (isLoading) return <p>Loading your order history...</p>;
+
   return (
     <div>
       <header className={styles.pageHeader}>
@@ -39,44 +33,36 @@ export default function OrderHistoryPage() {
         <p className={styles.pageSubtitle}>View the status and details of your past orders.</p>
       </header>
       
-      <table className={styles.orderTable}>
-        <thead>
-          <tr>
-            <th>Order ID</th>
-            <th>Product Details</th>
-            <th>Total (INR)</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sampleOrders.map(order => {
-            // Calculate total for the order
-            const totalUSD = order.items.reduce((sum, item) => sum + item.priceUSD, 0);
-            const totalINR = totalUSD * INR_CONVERSION_RATE;
-
-            return (
-              <tr key={order.id}>
-                <td>{order.id}<br/><small>{order.date}</small></td>
+      {orders.length > 0 ? (
+        <table className={styles.orderTable}>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Product Details</th>
+              <th>Total (INR)</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {orders.map(order => (
+              <tr key={order._id}>
+                <td>{order._id.substring(0, 8)}...<br/><small>{new Date(order.createdAt).toLocaleDateString()}</small></td>
                 <td>
-                  {order.items.map(item => (
-                    <div key={item.name} style={{ marginBottom: '0.5rem' }}>
-                      <strong>{item.name}</strong>
-                      <br />
-                      <small>by {item.artisan}</small>
-                    </div>
+                  {order.orderItems.map(item => (
+                    <div key={item._id}><strong>{item.name}</strong> (x{item.qty})</div>
                   ))}
                 </td>
-                <td>₹{totalINR.toFixed(2)}</td>
+                <td>₹{(order.totalPrice * INR_CONVERSION_RATE).toFixed(2)}</td>
                 <td>
-                  <span className={`${styles.status} ${order.status === 'Delivered' ? styles.statusDelivered : ''}`}>
-                    {order.status}
-                  </span>
+                  <span className={`${styles.status} ${styles.statusDelivered}`}>{order.orderStatus}</span>
                 </td>
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p>You have not placed any orders yet.</p>
+      )}
     </div>
   );
 }

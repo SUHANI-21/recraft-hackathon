@@ -7,6 +7,7 @@ import Link from 'next/link'; // <-- IMPORT Link
 // Reusable Sidebar component
 function Sidebar() {
   const { user, logout } = useAuth(); // <-- GET THE FULL USER OBJECT
+   console.log('Inspecting user in Sidebar:', user);
   
   return (
     <aside className={styles.sidebar}>
@@ -19,8 +20,12 @@ function Sidebar() {
           {/* --- NEW LINK FOR ALL USERS --- */}
           <li><Link href="/dashboard/my-posts" className={styles.navLink}>My Posts</Link></li>
 
-          {user && user.type === 'Artisan' && (
-            <li><Link href="/dashboard/my-products" className={styles.navLink}>My Products</Link></li>
+         {user && user.userType === 'Artisan' && (
+            <li>
+              <Link href="/dashboard/my-products" className={styles.navLink}>
+                My Products
+              </Link>
+            </li>
           )}
           
           <li><Link href="/dashboard/settings" className={styles.navLink}>Settings</Link></li>
