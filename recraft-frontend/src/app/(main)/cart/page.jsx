@@ -37,7 +37,7 @@ export default function CartPage() {
                 <Link href={`/products/${item._id}`} className={styles.itemName}>
                   {item.name}
                 </Link>
-                <p className={styles.itemPrice}>${item.price.toFixed(2)}</p>
+                <p className={styles.itemPrice}>₹{item.price.toFixed(2)}</p>
                 <div className={styles.itemActions}>
                   <input
                     type="number"
@@ -53,7 +53,7 @@ export default function CartPage() {
                 </div>
               </div>
               <p className={styles.itemSubtotal}>
-                ${(item.price * item.quantity).toFixed(2)}
+                ₹{(item.price * item.quantity).toFixed(2)}
               </p>
             </div>
           ))}

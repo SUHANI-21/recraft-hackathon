@@ -9,21 +9,35 @@ import { useCart } from '@/context/CartContext';
 export default function ProductGrid({ initialProducts }) {
   const { addToCart } = useCart();
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('name'); // 'name', 'price-low', 'price-high'
   const [filteredProducts, setFilteredProducts] = useState(initialProducts);
 
   useEffect(() => {
+    let result = initialProducts;
+    
+    // Apply search filter
     const lowercasedTerm = searchTerm.toLowerCase();
-    if (!lowercasedTerm) {
-      setFilteredProducts(initialProducts);
-      return;
+    if (lowercasedTerm) {
+      result = result.filter(product => {
+        if (product.name && product.name.toLowerCase().includes(lowercasedTerm)) return true;
+        if (product.category && product.category.toLowerCase().includes(lowercasedTerm)) return true;
+        if (product.tags && Array.isArray(product.tags) && product.tags.some(tag => tag.toLowerCase().includes(lowercasedTerm))) return true;
+        if (product.description && product.description.toLowerCase().includes(lowercasedTerm)) return true;
+        return false;
+      });
     }
-    const filtered = initialProducts.filter(product => 
-      product.name.toLowerCase().includes(lowercasedTerm) ||
-      product.category.toLowerCase().includes(lowercasedTerm) ||
-      (product.tags && product.tags.some(tag => tag.toLowerCase().includes(lowercasedTerm)))
-    );
-    setFilteredProducts(filtered);
-  }, [searchTerm, initialProducts]);
+    
+    // Apply sorting
+    if (sortBy === 'price-low') {
+      result = [...result].sort((a, b) => (a.price || 0) - (b.price || 0));
+    } else if (sortBy === 'price-high') {
+      result = [...result].sort((a, b) => (b.price || 0) - (a.price || 0));
+    } else {
+      result = [...result].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    }
+    
+    setFilteredProducts(result);
+  }, [searchTerm, sortBy, initialProducts]);
 
   const handleAddToCart = (event, product) => {
     event.preventDefault();
@@ -41,6 +55,15 @@ export default function ProductGrid({ initialProducts }) {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
+        <select 
+          className={styles.sortSelect} 
+          value={sortBy} 
+          onChange={(e) => setSortBy(e.target.value)}
+        >
+          <option value="name">Sort by Name</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="price-high">Price: High to Low</option>
+        </select>
       </div>
 
       {filteredProducts.length > 0 ? (
@@ -53,13 +76,12 @@ export default function ProductGrid({ initialProducts }) {
               </div>
               <div className={styles.productInfo}>
                 <h3 className={styles.productName}>{product.name}</h3>
-                <p className={styles.productCategory}>{product.category}</p>
                 {product.tags && (
                   <div className={styles.tagsContainer}>
                     {product.tags.slice(0, 3).map(tag => ( <span key={tag} className={styles.tag}>{tag}</span> ))}
                   </div>
                 )}
-                <p className={styles.productPrice}>${product.price.toFixed(2)}</p>
+                <p className={styles.productPrice}>₹{product.price.toFixed(2)}</p>
                 
                 {product.stock > 0 && (
                   <button 

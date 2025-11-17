@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react';
 import { fetchMyOrders } from '@/lib/api';
 import styles from '../dashboardPages.module.css';
 
-const INR_CONVERSION_RATE = 83.5;
-
 export default function OrderHistoryPage() {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,7 +50,7 @@ export default function OrderHistoryPage() {
                     <div key={item._id}><strong>{item.name}</strong> (x{item.qty})</div>
                   ))}
                 </td>
-                <td>₹{(order.totalPrice * INR_CONVERSION_RATE).toFixed(2)}</td>
+                <td>₹{order.totalPrice.toFixed(2)}</td>
                 <td>
                   <span className={`${styles.status} ${styles.statusDelivered}`}>{order.orderStatus}</span>
                 </td>

@@ -29,6 +29,11 @@ const inspirationPostSchema = mongoose.Schema(
       enum: ['Draft', 'Published'],
       default: 'Draft',
     },
+    likes: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: 'User',
+      default: [],
+    },
     // We can add photos, tags, etc. later
   },
   {

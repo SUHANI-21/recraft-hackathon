@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { fetchArtisans } from '@/lib/api';
+import ArtisanGrid from './ArtisanGrid';
 import styles from './artisans.module.css';
 
 export const revalidate = 0;
@@ -20,17 +21,7 @@ export default async function AllArtisansPage() {
         <p className={styles.subtitle}>Meet the creative minds turning waste into wonder.</p>
       </header>
 
-      <div className={styles.artisanGrid}>
-        {artisans.map(artisan => (
-          <Link key={artisan._id} href={`/artisans/${artisan._id}`} className={styles.artisanCard}>
-            <div className={styles.imageContainer}>
-              <Image src={artisan.profileImage || '/assets/images/default-avatar.png'} alt={artisan.name} fill={true} className={styles.artisanImage}/>
-            </div>
-            <h2 className={styles.storeName}>{artisan.name}</h2>
-            <p className={styles.bio}>A passionate creator turning waste into wonder. Explore their unique, sustainable products.</p>
-          </Link>
-        ))}
-      </div>
+      <ArtisanGrid initialArtisans={artisans} />
     </div>
   );
 }

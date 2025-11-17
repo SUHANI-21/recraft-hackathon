@@ -6,15 +6,29 @@ import { useRouter } from 'next/navigation';
 import { createProduct } from '@/lib/api';
 import styles from './addProduct.module.css';
 
+const COMMON_TAGS = ['Eco-Friendly', 'Handmade', 'Recycled', 'Sustainable', 'Upcycled', 'Organic', 'Fair Trade', 'Vegan'];
+
 export default function AddProductPage() {
   const router = useRouter();
   const [productData, setProductData] = useState({
-    name: '', description: '', price: '', stock: '', category: 'Home Decor',
+    name: '', description: '', price: '', stock: '', category: 'Fashion',
     tags: [], photos: '',
   });
+  const [newTag, setNewTag] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => { setProductData(prev => ({ ...prev, [e.target.name]: e.target.value })); };
+
+  const addTag = (tag) => {
+    if (tag && !productData.tags.includes(tag)) {
+      setProductData(prev => ({ ...prev, tags: [...prev.tags, tag] }));
+      setNewTag('');
+    }
+  };
+
+  const removeTag = (tagToRemove) => {
+    setProductData(prev => ({ ...prev, tags: prev.tags.filter(tag => tag !== tagToRemove) }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -56,12 +70,16 @@ export default function AddProductPage() {
             <label htmlFor="description" className={styles.label}>Description</label>
             <textarea id="description" name="description" value={productData.description} onChange={handleChange} className={styles.textarea} required />
           </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="category" className={styles.label}>Category</label>
+            <input type="text" id="category" name="category" value={productData.category} onChange={handleChange} className={styles.input} placeholder="e.g., Fashion, Jewelry, Accessories" required />
+          </div>
         </section>
         <section className={styles.formSection}>
           <h2 className={styles.sectionTitle}>3. Pricing & Inventory</h2>
           <div className={styles.formRow}>
             <div className={styles.formGroup}>
-              <label htmlFor="price" className={styles.label}>Price (USD)</label>
+              <label htmlFor="price" className={styles.label}>Price (INR)</label>
               <input type="number" id="price" name="price" value={productData.price} onChange={handleChange} className={styles.input} min="0" step="0.01" required />
             </div>
             <div className={styles.formGroup}>
@@ -69,6 +87,90 @@ export default function AddProductPage() {
               <input type="number" id="stock" name="stock" value={productData.stock} onChange={handleChange} className={styles.input} min="0" required />
             </div>
           </div>
+        </section>
+        <section className={styles.formSection}>
+          <h2 className={styles.sectionTitle}>4. Tags</h2>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Add Tags</label>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+              <input 
+                type="text" 
+                value={newTag} 
+                onChange={(e) => setNewTag(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag(newTag))}
+                className={styles.input} 
+                placeholder="Type a tag and press Enter"
+                style={{ flex: 1 }}
+              />
+              <button 
+                type="button" 
+                onClick={() => addTag(newTag)} 
+                className={`${styles.button} ${styles.publishButton}`}
+              >
+                Add
+              </button>
+            </div>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Popular Tags</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
+              {COMMON_TAGS.map(tag => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => addTag(tag)}
+                  className={styles.tagButton}
+                  style={{ 
+                    padding: '0.5rem 1rem', 
+                    border: '1px solid #ddd', 
+                    borderRadius: '20px',
+                    cursor: 'pointer',
+                    backgroundColor: productData.tags.includes(tag) ? '#e8f5e9' : 'white'
+                  }}
+                >
+                  + {tag}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {productData.tags.length > 0 && (
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Selected Tags</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                {productData.tags.map(tag => (
+                  <div
+                    key={tag}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      padding: '0.5rem 1rem',
+                      backgroundColor: '#e8f5e9',
+                      borderRadius: '20px',
+                      color: '#2e7d32'
+                    }}
+                  >
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => removeTag(tag)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#2e7d32',
+                        cursor: 'pointer',
+                        fontSize: '1.2rem'
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </section>
         <div className={styles.formActions}>
           <button type="submit" className={`${styles.button} ${styles.publishButton}`} disabled={isLoading}>

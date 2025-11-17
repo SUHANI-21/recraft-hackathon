@@ -44,9 +44,11 @@ export default function InspirationPostPage() {
       <h1 className={styles.title}>{post.title}</h1>
       
       <div className={styles.meta}>
-        <div className={styles.avatarContainer}>
-          <Image src={post.user.profileImage || '/assets/images/default-avatar.png'} alt={post.user.name} fill={true} className={styles.avatarImage} />
-        </div>
+        {isArtisan && (
+          <div className={styles.avatarContainer}>
+            <Image src={post.user.profileImage || '/assets/images/default-avatar.png'} alt={post.user.name} fill={true} className={styles.avatarImage} />
+          </div>
+        )}
         <div className={styles.authorInfo}>
           
           {/* --- THIS IS THE FIX --- */}

@@ -83,6 +83,19 @@
   border-top: 1px solid #f0f0f0;
 }
 
+.userLink {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.2s ease;
+}
+
+.userLink:hover {
+  opacity: 0.8;
+}
+
 .avatarContainer {
   width: 40px;
   height: 40px;

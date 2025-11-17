@@ -113,21 +113,21 @@ const handlePlaceOrder = async (event) => {
           <h2 className={styles.sectionTitle}>Order Summary</h2>
           <div className={styles.summaryLine}>
             <span>Subtotal</span>
-            <span>${subtotal.toFixed(2)}</span>
+            <span>₹{subtotal.toFixed(2)}</span>
           </div>
           <div className={styles.summaryLine}>
             <span>Shipping</span>
-            <span>${shipping.toFixed(2)}</span>
+            <span>₹{shipping.toFixed(2)}</span>
           </div>
           {discount > 0 && (
             <div className={`${styles.summaryLine} ${styles.discountLine}`}>
               <span>Discount (RECYCLED20)</span>
-              <span>-${discount.toFixed(2)}</span>
+              <span>-₹{discount.toFixed(2)}</span>
             </div>
           )}
           <div className={styles.summaryTotal}>
             <span>Total</span>
-            <span>${total.toFixed(2)}</span>
+            <span>₹{total.toFixed(2)}</span>
           </div>
 
           <div className={styles.couponForm}>

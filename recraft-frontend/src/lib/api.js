@@ -124,6 +124,18 @@ export const deleteProduct = (id) => {
   }).then(handleResponse);
 };
 
+export const publishProduct = (id) => {
+  const token = getToken();
+  return fetch(`${API_URL}/api/products/${id}/publish`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ status: 'Published' }),
+  }).then(handleResponse);
+};
+
 // === INSPIRATION POSTS ===
 
 
@@ -178,6 +190,40 @@ export const deletePost = (id) => {
   return fetch(`${API_URL}/api/posts/${id}`, {
     method: 'DELETE',
     headers: { 'Authorization': `Bearer ${token}` },
+  }).then(handleResponse);
+};
+
+export const publishPost = (id) => {
+  const token = getToken();
+  return fetch(`${API_URL}/api/posts/${id}/publish`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ status: 'Published' }),
+  }).then(handleResponse);
+};
+
+export const likePost = (id) => {
+  const token = getToken();
+  return fetch(`${API_URL}/api/posts/${id}/like`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  }).then(handleResponse);
+};
+
+export const unlikePost = (id) => {
+  const token = getToken();
+  return fetch(`${API_URL}/api/posts/${id}/unlike`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
   }).then(handleResponse);
 };
 

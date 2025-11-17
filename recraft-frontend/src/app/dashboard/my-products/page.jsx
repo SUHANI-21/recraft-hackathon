@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { fetchMyProducts, deleteProduct } from '@/lib/api'; // These API functions need to be created
+import { fetchMyProducts, deleteProduct, publishProduct } from '@/lib/api'; // These API functions need to be created
 import styles from '../dashboardPages.module.css';
 import listStyles from './myProducts.module.css';
 
@@ -10,6 +10,7 @@ export default function MyProductsPage() {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [publishingId, setPublishingId] = useState(null);
 
   useEffect(() => {
     const loadMyProducts = async () => {
@@ -38,6 +39,24 @@ export default function MyProductsPage() {
       } catch (err) {
         alert(`Failed to delete product: ${err.message}`);
       }
+    }
+  };
+
+  const handlePublish = async (productId) => {
+    try {
+      setPublishingId(productId);
+      await publishProduct(productId);
+      // Update the product status in the state
+      setProducts(currentProducts =>
+        currentProducts.map(p =>
+          p._id === productId ? { ...p, status: 'Published' } : p
+        )
+      );
+      alert("Product published successfully!");
+    } catch (err) {
+      alert(`Failed to publish product: ${err.message}`);
+    } finally {
+      setPublishingId(null);
     }
   };
 
@@ -77,6 +96,15 @@ export default function MyProductsPage() {
                 <Link href={`/dashboard/my-products/edit/${product._id}`} className={listStyles.editButton}>
                   Edit
                 </Link>
+                {product.status === 'Draft' && (
+                  <button 
+                    onClick={() => handlePublish(product._id)} 
+                    className={listStyles.publishButton}
+                    disabled={publishingId === product._id}
+                  >
+                    {publishingId === product._id ? 'Publishing...' : 'Publish'}
+                  </button>
+                )}
                 <button onClick={() => handleDelete(product._id)} className={listStyles.deleteButton}>
                   Delete
                 </button>

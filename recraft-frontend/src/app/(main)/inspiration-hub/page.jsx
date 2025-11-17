@@ -47,15 +47,21 @@ export default async function InspirationHubPage() {
               <h2 className={styles.cardTitle}>{post.title}</h2>
               <p className={styles.cardDescription}>{post.description}</p>
               <div className={styles.cardMeta}>
-                <div className={styles.avatarContainer}>
-                  <Image 
-                    src={post.user.profileImage || '/assets/images/default-avatar.png'} 
-                    alt={post.user.name} 
-                    fill={true} 
-                    className={styles.avatarImage} 
-                  />
-                </div>
-                <span className={styles.userName}>by {post.user.name}</span>
+                {post.user.userType === 'Artisan' ? (
+                  <Link href={`/artisans/${post.user._id}`} className={styles.userLink}>
+                    <div className={styles.avatarContainer}>
+                      <Image 
+                        src={post.user.profileImage || '/assets/images/default-avatar.png'} 
+                        alt={post.user.name} 
+                        fill={true} 
+                        className={styles.avatarImage} 
+                      />
+                    </div>
+                    <span className={styles.userName}>by {post.user.name}</span>
+                  </Link>
+                ) : (
+                  <span className={styles.userName}>by {post.user.name}</span>
+                )}
               </div>
             </div>
           </Link>

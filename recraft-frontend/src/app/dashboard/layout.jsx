@@ -39,13 +39,19 @@ function Sidebar() {
 
 // ... the rest of the file (DashboardLayout) remains the same ...
 export default function DashboardLayout({ children }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
+  // Show loading state while auth context is initializing
+  if (loading) {
+    return <div className={styles.dashboardLayout}><p>Loading...</p></div>;
+  }
+
+  // Redirect to login only if loading is complete AND user is not authenticated
   if (!user) {
     if (typeof window !== 'undefined') {
       window.location.href = '/login';
     }
-    return null; // Or a loading spinner
+    return null;
   }
 
   return (

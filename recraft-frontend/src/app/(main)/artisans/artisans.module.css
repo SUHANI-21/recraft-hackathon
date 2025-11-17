@@ -18,6 +18,30 @@
   margin-top: 0.5rem;
 }
 
+/* Search Container */
+.searchContainer {
+  margin-bottom: 2.5rem;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.searchInput {
+  padding: 0.9rem 1.2rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 500px;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--dark-brown);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
 /* Artisan Grid Styles */
 .artisanGrid {
   display: grid;

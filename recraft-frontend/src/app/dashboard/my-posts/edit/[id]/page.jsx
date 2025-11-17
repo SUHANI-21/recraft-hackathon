@@ -82,9 +82,9 @@ export default function EditInspirationPostPage() {
       <header className={styles.formHeader}><h1 className={styles.formTitle}>Edit Inspiration Post</h1><p className={styles.formSubtitle}>Make changes to your post and publish when ready.</p></header>
       <form>
         <div className={styles.formGroup}><label htmlFor="title" className={styles.label}>Post Title</label><input type="text" id="title" name="title" value={postData.title} onChange={handleChange} className={styles.input} required /></div>
-        <div className={styles.formGroup}><label htmlFor="photos" className={styles.label}>Image URL</label><input type="text" id="photos" name="photos" value={postData.photos} onChange={handleChange} className={styles.input} required /></div>
         <div className={styles.formGroup}><label htmlFor="description" className={styles.label}>Description</label><textarea id="description" name="description" value={postData.description} onChange={handleChange} className={styles.textarea} required /></div>
         <div className={styles.formGroup}><label htmlFor="materialsUsed" className={styles.label}>Materials Used</label><input type="text" id="materialsUsed" name="materialsUsed" value={postData.materialsUsed} onChange={handleChange} className={styles.input} /><p className={styles.helperText}>Separate with commas.</p></div>
+        <div className={styles.formGroup}><label htmlFor="photos" className={styles.label}>Image URL</label><input type="url" id="photos" name="photos" value={postData.photos} onChange={handleChange} className={styles.input} placeholder="https://example.com/image.jpg" /><p className={styles.helperText}>Update the image URL if needed.</p></div>
         {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
         <div className={styles.formActions}>
           <button onClick={handleSaveChanges} className={`${styles.button} ${styles.draftButton}`} disabled={isLoading}>{isLoading ? 'Saving...' : 'Save Changes'}</button>

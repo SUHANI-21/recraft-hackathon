@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { fetchMyPosts, deletePost } from '@/lib/api'; // Make sure deletePost is imported
+import { fetchMyPosts, deletePost, publishPost } from '@/lib/api'; // Make sure deletePost is imported
 import styles from '../dashboardPages.module.css';
 import listStyles from '../my-products/myProducts.module.css';
 
@@ -40,6 +40,20 @@ export default function MyPostsPage() {
     }
   };
 
+  // --- PUBLISH FUNCTIONALITY ---
+  const handlePublish = async (postId) => {
+    try {
+      const updatedPost = await publishPost(postId);
+      // Update the post in the state
+      setPosts(currentPosts =>
+        currentPosts.map(p => p._id === postId ? { ...p, status: 'Published' } : p)
+      );
+      alert("Post published successfully!");
+    } catch (err) {
+      alert(`Failed to publish post: ${err.message}`);
+    }
+  };
+
   if (isLoading) return <p>Loading your posts...</p>;
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
 
@@ -54,6 +68,9 @@ export default function MyPostsPage() {
               <div className={listStyles.productDetails}><h3 className={listStyles.productName}>{post.title}</h3><span className={`${listStyles.status} ${post.status === 'Published' ? listStyles.statusPublished : listStyles.statusDraft}`}>{post.status}</span></div>
               <div className={listStyles.productActions}>
                 <Link href={`/dashboard/my-posts/edit/${post._id}`} className={listStyles.editButton}>Edit</Link>
+                {post.status === 'Draft' && (
+                  <button onClick={() => handlePublish(post._id)} className={listStyles.publishButton}>Publish</button>
+                )}
                 <button onClick={() => handleDelete(post._id)} className={listStyles.deleteButton}>Delete</button>
               </div>
             </div>

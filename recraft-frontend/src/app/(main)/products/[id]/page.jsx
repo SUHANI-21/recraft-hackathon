@@ -68,8 +68,10 @@ export default function ProductDetailPage() {
   };
 
   const handleContactClick = () => {
-    if (!artisan || !artisan.contact) return;
-    const message = `This is a simulation. Contact ${artisan.name} using:\n\nEmail: ${artisan.contact.email}\nPhone: ${artisan.contact.phone}`;
+    if (!artisan) return;
+    const email = artisan.email || 'Not provided';
+    const phone = artisan.contact?.phone || 'Not provided';
+    const message = `This is a simulation. Contact ${artisan.name} using:\n\nEmail: ${email}\nPhone: ${phone}`;
     alert(message);
   };
   
@@ -88,7 +90,7 @@ export default function ProductDetailPage() {
       <div className={styles.details}>
         <p className={styles.category}>{product.category}</p>
         <h1 className={styles.name}>{product.name}</h1>
-        <p className={styles.price}>${product.price.toFixed(2)}</p>
+        <p className={styles.price}>₹{product.price.toFixed(2)}</p>
         <p className={styles.description}>{product.description}</p>
         <div className={styles.ctaSection}>
           {product.stock > 0 ? (

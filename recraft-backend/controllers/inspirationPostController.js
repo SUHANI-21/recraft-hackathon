@@ -4,7 +4,7 @@ import InspirationPost from '../models/inspirationPostModel.js';
 // @route   GET /api/posts
 // @access  Public
 const getPosts = async (req, res) => {
-  const posts = await InspirationPost.find({ status: 'Published' }).populate('user', 'name');
+  const posts = await InspirationPost.find({ status: 'Published' }).populate('user', 'name profileImage userType');
   res.json(posts);
 };
 
@@ -129,7 +129,7 @@ const deletePost = async (req, res) => {
 };
 const getPostById = async (req, res) => {
     try {
-        const post = await InspirationPost.findById(req.params.id).populate('user', 'name profileImage');
+        const post = await InspirationPost.findById(req.params.id).populate('user', 'name profileImage userType');
         if (post) {
             res.json(post);
         } else {
@@ -140,10 +140,97 @@ const getPostById = async (req, res) => {
     }
 };
 const getMyPosts = async (req, res) => {
-    const posts = await InspirationPost.find({ user: req.user._id });
+    const posts = await InspirationPost.find({ user: req.user._id }).populate('user', 'name profileImage userType');
     res.json(posts);
 };
 
-export { getPosts, createPost, updatePost, deletePost, getPostById, getMyPosts };
+// @desc    Publish a draft post
+// @route   PUT /api/posts/:id/publish
+// @access  Private
+const publishPost = async (req, res) => {
+  try {
+    const post = await InspirationPost.findById(req.params.id);
+
+    if (!post) {
+      res.status(404).json({ message: 'Post not found' });
+      return;
+    }
+
+    // Security Check: Make sure the logged-in user is the owner of the post
+    if (post.user.toString() !== req.user._id.toString()) {
+      res.status(401).json({ message: 'User not authorized to publish this post' });
+      return;
+    }
+
+    // Update post status to Published
+    post.status = 'Published';
+    const updatedPost = await post.save();
+    res.json(updatedPost);
+
+  } catch (error) {
+    const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+    res.status(statusCode).json({ message: error.message });
+  }
+};
+
+// @desc    Like a post
+// @route   POST /api/posts/:id/like
+// @access  Private
+const likePost = async (req, res) => {
+  try {
+    const post = await InspirationPost.findById(req.params.id);
+
+    if (!post) {
+      res.status(404).json({ message: 'Post not found' });
+      return;
+    }
+
+    // Check if user already liked the post
+    if (post.likes.includes(req.user._id)) {
+      res.status(400).json({ message: 'You already liked this post' });
+      return;
+    }
+
+    // Add user to likes array
+    post.likes.push(req.user._id);
+    await post.save();
+    res.json({ likeCount: post.likes.length });
+
+  } catch (error) {
+    const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+    res.status(statusCode).json({ message: error.message });
+  }
+};
+
+// @desc    Unlike a post
+// @route   POST /api/posts/:id/unlike
+// @access  Private
+const unlikePost = async (req, res) => {
+  try {
+    const post = await InspirationPost.findById(req.params.id);
+
+    if (!post) {
+      res.status(404).json({ message: 'Post not found' });
+      return;
+    }
+
+    // Check if user liked the post
+    if (!post.likes.includes(req.user._id)) {
+      res.status(400).json({ message: 'You have not liked this post' });
+      return;
+    }
+
+    // Remove user from likes array
+    post.likes = post.likes.filter(userId => userId.toString() !== req.user._id.toString());
+    await post.save();
+    res.json({ likeCount: post.likes.length });
+
+  } catch (error) {
+    const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+    res.status(statusCode).json({ message: error.message });
+  }
+};
+
+export { getPosts, createPost, updatePost, deletePost, getPostById, getMyPosts, publishPost, likePost, unlikePost };
 
 

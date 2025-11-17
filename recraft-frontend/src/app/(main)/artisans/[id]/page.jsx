@@ -26,6 +26,7 @@ export default function ArtisanStorefrontPage() {
         // Fetch the artisan's public profile
         const artisanData = await fetchArtisanById(id);
         if (!artisanData) throw new Error('Artisan not found');
+        console.log('Artisan data loaded:', artisanData);
         setArtisan(artisanData);
 
         // Fetch all products and then filter for this artisan
@@ -66,9 +67,9 @@ export default function ArtisanStorefrontPage() {
           {artisan.contact && (
             <div className={styles.contactSection}>
               <div className={styles.contactGrid}>
-                <div className={styles.contactItem}><strong>Email:</strong><br /><a href={`mailto:${artisan.contact.email}`}>{artisan.contact.email}</a></div>
-                <div className={styles.contactItem}><strong>Phone:</strong><br /><a href={`tel:${artisan.contact.phone}`}>{artisan.contact.phone}</a></div>
-                <div className={styles.contactItem}><strong>Address:</strong><br /><span>{artisan.contact.address}</span></div>
+                <div className={styles.contactItem}><strong>Email:</strong><br />{artisan.email ? <a href={`mailto:${artisan.email}`}>{artisan.email}</a> : <span>Not provided</span>}</div>
+                <div className={styles.contactItem}><strong>Phone:</strong><br />{artisan.contact.phone ? <a href={`tel:${artisan.contact.phone}`}>{artisan.contact.phone}</a> : <span>Not provided</span>}</div>
+                <div className={styles.contactItem}><strong>Address:</strong><br /><span>{artisan.contact.address || 'Not provided'}</span></div>
               </div>
             </div>
           )}
@@ -82,7 +83,7 @@ export default function ArtisanStorefrontPage() {
             {artisanProducts.map(product => (
               <Link key={product._id} href={`/products/${product._id}`} className={styles.productCard}>
                 <div className={styles.productImageContainer}><Image src={product.photos[0]} alt={product.name} fill={true} className={styles.productImage} /></div>
-                <div className={styles.productInfo}><h3 className={styles.productName}>{product.name}</h3><p className={styles.productPrice}>${product.price.toFixed(2)}</p></div>
+                <div className={styles.productInfo}><h3 className={styles.productName}>{product.name}</h3><p className={styles.productPrice}>₹{product.price.toFixed(2)}</p></div>
               </Link>
             ))}
           </div>

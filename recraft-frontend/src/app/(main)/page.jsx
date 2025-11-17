@@ -41,7 +41,7 @@ export default function HomePage() {
               <div className={styles.productInfo}>
                 <h3 className={styles.productName}>{product.name}</h3>
                 <p className={styles.productCategory}>{product.category}</p>
-                <p className={styles.productPrice}>${product.price.toFixed(2)}</p>
+                <p className={styles.productPrice}>₹{product.price.toFixed(2)}</p>
               </div>
             </Link>
           ))}

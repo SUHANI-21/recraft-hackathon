@@ -1,6 +1,6 @@
 import express from 'express';
 const router = express.Router();
-import { getProducts, getProductById, createProduct, updateProduct, deleteProduct, getMyProducts, getMyProductById  } from '../controllers/productController.js';
+import { getProducts, getProductById, createProduct, updateProduct, deleteProduct, getMyProducts, getMyProductById, publishProduct  } from '../controllers/productController.js';
 import { protect, isArtisan } from '../middleware/authMiddleware.js';
 
 // --- Public Routes ---
@@ -28,5 +28,6 @@ router.get('/', getProducts);
 router.post('/', protect, isArtisan, createProduct);
 router.put('/:id', protect, isArtisan, updateProduct);
 router.delete('/:id', protect, isArtisan, deleteProduct);
+router.put('/:id/publish', protect, isArtisan, publishProduct);
 
 export default router;

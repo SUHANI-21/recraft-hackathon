@@ -76,12 +76,13 @@ export default function EditProductPage() {
           <h2 className={styles.sectionTitle}>Basic Information</h2>
           <div className={styles.formGroup}><label htmlFor="name" className={styles.label}>Product Name</label><input type="text" id="name" name="name" value={productData.name} onChange={handleChange} className={styles.input} required /></div>
           <div className={styles.formGroup}><label htmlFor="description" className={styles.label}>Description</label><textarea id="description" name="description" value={productData.description} onChange={handleChange} className={styles.textarea} required /></div>
+          <div className={styles.formGroup}><label htmlFor="category" className={styles.label}>Category</label><input type="text" id="category" name="category" value={productData.category} onChange={handleChange} className={styles.input} placeholder="e.g., Fashion, Jewelry, Accessories" required /></div>
         </section>
 
         <section className={styles.formSection}>
           <h2 className={styles.sectionTitle}>Pricing & Inventory</h2>
           <div className={styles.formRow}>
-            <div className={styles.formGroup}><label htmlFor="price" className={styles.label}>Price (USD)</label><input type="number" id="price" name="price" value={productData.price} onChange={handleChange} className={styles.input} required min="0" /></div>
+            <div className={styles.formGroup}><label htmlFor="price" className={styles.label}>Price (INR)</label><input type="number" id="price" name="price" value={productData.price} onChange={handleChange} className={styles.input} required min="0" /></div>
             <div className={styles.formGroup}><label htmlFor="stock" className={styles.label}>Stock Quantity</label><input type="number" id="stock" name="stock" value={productData.stock} onChange={handleChange} className={styles.input} required min="0" /></div>
           </div>
         </section>

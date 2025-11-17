@@ -105,18 +105,32 @@
 .searchContainer {
   margin-bottom: 2rem;
   width: 100%;
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .searchInput {
-  width: 100%;
   padding: 0.9rem 1.2rem;
   font-size: 1.1rem;
   border: 1px solid #ccc;
   border-radius: 25px; /* Pill shape */
   box-sizing: border-box;
+  flex: 1;
+  min-width: 250px;
+}
+
+.sortSelect {
+  padding: 0.9rem 1.2rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  box-sizing: border-box;
+  background-color: white;
+  cursor: pointer;
+  min-width: 180px;
 }
 
 /* Product Card Tag Styles */

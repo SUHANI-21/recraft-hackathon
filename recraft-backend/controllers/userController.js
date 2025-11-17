@@ -20,7 +20,13 @@ const registerUser = async (req, res) => {
     const user = await User.create({ name, email, password, userType, contact });
     if (user) {
       res.status(201).json({
-        _id: user._id, name: user.name, email: user.email, userType: user.userType, token: generateToken(user._id),
+        _id: user._id, 
+        name: user.name, 
+        email: user.email, 
+        userType: user.userType, 
+        profileImage: user.profileImage,
+        contact: user.contact,
+        token: generateToken(user._id),
       });
     } else {
       res.status(400); throw new Error('Invalid user data');
@@ -38,7 +44,13 @@ const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
     if (user && (await bcrypt.compare(password, user.password))) {
       res.json({
-        _id: user._id, name: user.name, email: user.email, userType: user.userType, token: generateToken(user._id),
+        _id: user._id, 
+        name: user.name, 
+        email: user.email, 
+        userType: user.userType, 
+        profileImage: user.profileImage,
+        contact: user.contact,
+        token: generateToken(user._id),
       });
     } else {
       res.status(401); throw new Error('Invalid email or password');
@@ -51,20 +63,29 @@ const loginUser = async (req, res) => {
 // @desc    Update user profile
 // @route   PUT /api/users/profile
 const updateUserProfile = async (req, res) => {
-  const user = await User.findById(req.user._id);
-  if (user) {
-    user.name = req.body.name || user.name;
-    user.profileImage = req.body.profileImage || user.profileImage;
-    if (user.userType === 'Artisan') {
-      user.contact.phone = req.body.contact?.phone || user.contact.phone;
-      user.contact.address = req.body.contact?.address || user.contact.address;
+  try {
+    console.log('Update profile request for user:', req.user._id);
+    console.log('Request body:', req.body);
+    
+    const user = await User.findById(req.user._id);
+    if (user) {
+      user.name = req.body.name || user.name;
+      user.profileImage = req.body.profileImage || user.profileImage;
+      if (user.userType === 'Artisan') {
+        user.contact.phone = req.body.contact?.phone || user.contact.phone;
+        user.contact.address = req.body.contact?.address || user.contact.address;
+      }
+      const updatedUser = await user.save();
+      console.log('User profile updated successfully:', updatedUser._id);
+      res.json({
+        _id: updatedUser._id, name: updatedUser.name, email: updatedUser.email, userType: updatedUser.userType, profileImage: updatedUser.profileImage, contact: updatedUser.contact,
+      });
+    } else {
+      res.status(404).json({ message: 'User not found' });
     }
-    const updatedUser = await user.save();
-    res.json({
-      _id: updatedUser._id, name: updatedUser.name, email: updatedUser.email, userType: updatedUser.userType, profileImage: updatedUser.profileImage, contact: updatedUser.contact,
-    });
-  } else {
-    res.status(404); throw new Error('User not found');
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    res.status(res.statusCode || 500).json({ message: error.message });
   }
 };
 
@@ -87,7 +108,7 @@ const getUserById = async (req, res) => {
         if (user) {
             res.json(user);
         } else {
-            res.status(404); throw new Error('User not found');
+            res.status(404).json({ message: 'User not found' });
         }
     } catch (error) {
         res.status(res.statusCode || 500).json({ message: error.message });

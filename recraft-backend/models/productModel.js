@@ -45,6 +45,11 @@ const productSchema = mongoose.Schema(
       type: [String], // Defines an array of strings
       default: [],
     },
+    likes: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: 'User',
+      default: [],
+    },
     // We will add image URLs and materials later to keep this simple for now
   },
   {

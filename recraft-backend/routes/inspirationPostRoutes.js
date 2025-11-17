@@ -1,6 +1,6 @@
 import express from 'express';
 const router = express.Router();
-import { getPosts, createPost, updatePost, deletePost, getPostById, getMyPosts } from '../controllers/inspirationPostController.js';
+import { getPosts, createPost, updatePost, deletePost, getPostById, getMyPosts, publishPost, likePost, unlikePost } from '../controllers/inspirationPostController.js';
 import { protect } from '../middleware/authMiddleware.js'; // We only need `protect`
 // ... (imports)
 
@@ -16,5 +16,12 @@ router.route('/:id')
   .get(getPostById) // <-- ADD THIS
   .put(protect, updatePost)
   .delete(protect, deletePost);
+
+// Publish route
+router.route('/:id/publish').put(protect, publishPost);
+
+// Like/Unlike routes
+router.route('/:id/like').post(protect, likePost);
+router.route('/:id/unlike').post(protect, unlikePost);
 
 export default router;

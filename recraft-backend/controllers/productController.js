@@ -178,6 +178,33 @@ const getMyProductById = async (req, res) => {
     }
 };
 
+// @desc    Publish a draft product
+// @route   PUT /api/products/:id/publish
+// @access  Private/Artisan
+const publishProduct = async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+
+        if (!product) {
+            res.status(404);
+            throw new Error('Product not found');
+        }
+
+        // --- SECURITY CHECK ---
+        // Ensure the logged-in user is the owner of this product
+        if (product.artisanId.toString() !== req.user._id.toString()) {
+            res.status(401); // Unauthorized
+            throw new Error('Not authorized to publish this product');
+        }
+
+        product.status = 'Published';
+        const updatedProduct = await product.save();
+        res.json(updatedProduct);
+    } catch (error) {
+        res.status(res.statusCode || 500).json({ message: error.message });
+    }
+};
+
 // Add the new function to your exports
 export { 
   getProducts, 
@@ -186,7 +213,8 @@ export {
   updateProduct, 
   deleteProduct, 
   getMyProducts,
-  getMyProductById // <-- EXPORT NEW FUNCTION
+  getMyProductById,
+  publishProduct
 };
 // Add this to your exports at the bottom of the file
 

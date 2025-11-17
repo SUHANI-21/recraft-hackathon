@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
+import { likePost, unlikePost } from '@/lib/api';
 import styles from './post.module.css';
 
 const HeartIcon = (props) => (
@@ -11,28 +13,42 @@ const HeartIcon = (props) => (
 );
 
 export default function PostActions({ post }) {
-  // --- THIS IS THE FIX ---
-  // A simple, consistent way to generate a "random" starting number of likes
-  // that will be the same every time you load the page for this specific post.
-  const getInitialLikes = (postId) => {
-    // Use characters from the post ID to create a number
-    if (!postId) return 0;
-    return (postId.charCodeAt(postId.length - 1) + postId.charCodeAt(postId.length - 2)) % 100;
-  };
-
+  const { user } = useAuth();
   const [isLiked, setIsLiked] = useState(false);
-  // Initialize the like count with our stable, non-random function
-  const [likeCount, setLikeCount] = useState(getInitialLikes(post._id));
+  const [likeCount, setLikeCount] = useState(post.likes?.length || 0);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // When the component first loads, set the initial like count.
-  // This prevents it from being recalculated on every re-render.
+  // Check if current user has liked the post
   useEffect(() => {
-    setLikeCount(getInitialLikes(post._id));
-  }, [post._id]); // Only run this when the post ID changes
+    if (user && post.likes) {
+      setIsLiked(post.likes.includes(user._id));
+    }
+    setLikeCount(post.likes?.length || 0);
+  }, [post, user]);
 
-  const handleLikeClick = () => {
-    setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
-    setIsLiked(!isLiked);
+  const handleLikeClick = async () => {
+    if (!user) {
+      alert('Please log in to like posts');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      if (isLiked) {
+        await unlikePost(post._id);
+        setIsLiked(false);
+        setLikeCount(likeCount - 1);
+      } else {
+        await likePost(post._id);
+        setIsLiked(true);
+        setLikeCount(likeCount + 1);
+      }
+    } catch (err) {
+      console.error('Error liking post:', err);
+      alert('Failed to like post');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -40,6 +56,7 @@ export default function PostActions({ post }) {
       <button 
         onClick={handleLikeClick} 
         className={`${styles.likeButton} ${isLiked ? styles.liked : ''}`}
+        disabled={isLoading}
       >
         <HeartIcon 
           className={styles.heartIcon} 

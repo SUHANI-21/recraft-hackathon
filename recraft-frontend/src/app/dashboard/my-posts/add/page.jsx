@@ -24,8 +24,8 @@ export default function AddInspirationPostPage() {
       const dataToSend = {
         title: postData.title,
         description: postData.description,
-        photos: [postData.photos], // Send as an array
-        materialsUsed: postData.materialsUsed.split(',').map(m => m.trim())
+        photos: postData.photos ? [postData.photos] : ['https://via.placeholder.com/600x400?text=' + encodeURIComponent(postData.title)], // Use provided URL or generate placeholder
+        materialsUsed: postData.materialsUsed.split(',').map(m => m.trim()).filter(m => m)
       };
       
       await createPost(dataToSend);
@@ -56,10 +56,6 @@ export default function AddInspirationPostPage() {
           <input type="text" id="title" name="title" value={postData.title} onChange={handleChange} className={styles.input} required />
         </div>
         <div className={styles.formGroup}>
-          <label htmlFor="photos" className={styles.label}>Image URL</label>
-          <input type="text" id="photos" name="photos" value={postData.photos} onChange={handleChange} className={styles.input} placeholder="https://i.imgur.com/your-image.jpg" required />
-        </div>
-        <div className={styles.formGroup}>
           <label htmlFor="description" className={styles.label}>Description</label>
           <textarea id="description" name="description" value={postData.description} onChange={handleChange} className={styles.textarea} required />
         </div>
@@ -67,6 +63,11 @@ export default function AddInspirationPostPage() {
           <label htmlFor="materialsUsed" className={styles.label}>Materials Used</label>
           <input type="text" id="materialsUsed" name="materialsUsed" value={postData.materialsUsed} onChange={handleChange} className={styles.input} />
           <p className={styles.helperText}>Separate with commas.</p>
+        </div>
+        <div className={styles.formGroup}>
+          <label htmlFor="photos" className={styles.label}>Image URL (Optional)</label>
+          <input type="url" id="photos" name="photos" value={postData.photos} onChange={handleChange} className={styles.input} placeholder="https://example.com/image.jpg" />
+          <p className={styles.helperText}>If not provided, a placeholder image will be used.</p>
         </div>
 
         {/* --- NEW: Display the specific error message on the page --- */}
